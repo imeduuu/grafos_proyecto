@@ -1,0 +1,9 @@
+{
+  "nombre": "Modificación 1",
+  "descripcion": "TODO: describir qué se cambia y por qué (ej.: bloquear un pasillo crítico).",
+  "basada_en": "grafo_inicial.json",
+  "arcos_bloqueados": [],
+  "arcos_agregados": [],
+  "entrada": "s",
+  "salida": "t"
+}

@@ -1,0 +1,16 @@
+{
+  "descripcion": "TODO: caso pequeño (4 a 6 vértices) resuelto a mano para la sección de verificación del informe.",
+  "vertices": [],
+  "arcos": [],
+  "entrada": "s",
+  "salida": "t",
+  "posiciones": {},
+  "resultado_manual_esperado": {
+    "existe_camino": null,
+    "longitud_minima": null,
+    "camino_minimo_ejemplo": [],
+    "max_caminos_sin_arcos_compartidos": null,
+    "caminos_disjuntos_ejemplo": [],
+    "corte_minimo_ejemplo": []
+  }
+}

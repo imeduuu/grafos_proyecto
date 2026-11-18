@@ -1,0 +1,8 @@
+{
+  "descripcion": "TODO: red principal del grupo. Debe tener 10-12 vértices, 14-20 arcos, sin lazos, sin arcos repetidos, sin arcos recíprocos, sin vértices aislados y al menos 2 caminos s-t sin arcos compartidos.",
+  "vertices": [],
+  "arcos": [],
+  "entrada": "s",
+  "salida": "t",
+  "posiciones": {}
+}

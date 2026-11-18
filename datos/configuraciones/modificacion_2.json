@@ -1,0 +1,9 @@
+{
+  "nombre": "Modificación 2",
+  "descripcion": "TODO: describir qué se cambia y por qué (ej.: agregar un pasillo que crea una nueva alternativa).",
+  "basada_en": "grafo_inicial.json",
+  "arcos_bloqueados": [],
+  "arcos_agregados": [],
+  "entrada": "s",
+  "salida": "t"
+}

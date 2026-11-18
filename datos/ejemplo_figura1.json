@@ -1,0 +1,18 @@
+{
+  "descripcion": "Laberinto de la Figura 1 del enunciado (9 vértices, 12 arcos). Solo sirve de ejemplo y para pruebas: NO cumple las restricciones de la red inicial (10-12 vértices, 14-20 arcos).",
+  "vertices": ["s", "A", "B", "C", "D", "E", "F", "G", "t"],
+  "arcos": [
+    ["s", "A"], ["A", "B"],
+    ["s", "C"], ["A", "D"], ["B", "E"],
+    ["C", "D"], ["D", "E"],
+    ["C", "F"], ["D", "G"], ["E", "t"],
+    ["F", "G"], ["G", "t"]
+  ],
+  "entrada": "s",
+  "salida": "t",
+  "posiciones": {
+    "s": [0, 2], "A": [1, 2], "B": [2, 2],
+    "C": [0, 1], "D": [1, 1], "E": [2, 1],
+    "F": [0, 0], "G": [1, 0], "t": [2, 0]
+  }
+}
