@@ -1,8 +1,24 @@
 {
-  "descripcion": "TODO: red principal del grupo. Debe tener 10-12 vértices, 14-20 arcos, sin lazos, sin arcos repetidos, sin arcos recíprocos, sin vértices aislados y al menos 2 caminos s-t sin arcos compartidos.",
-  "vertices": [],
-  "arcos": [],
+  "descripcion": "Red principal del grupo: 11 vértices, 16 pasillos, organizada en capas s | A B C | D E F | G H I | t.",
+  "vertices": ["s", "A", "B", "C", "D", "E", "F", "G", "H", "I", "t"],
+  "arcos": [
+    ["s", "A"], ["s", "B"], ["s", "C"],
+    ["A", "B"], ["A", "D"],
+    ["B", "D"], ["B", "E"],
+    ["C", "E"], ["C", "F"],
+    ["F", "E"],
+    ["D", "G"], ["E", "H"],
+    ["G", "H"], ["G", "t"],
+    ["H", "I"], ["I", "t"]
+  ],
   "entrada": "s",
   "salida": "t",
-  "posiciones": {}
+  "posiciones": {
+    "s": [0, 1],
+    "A": [1, 2], "B": [1, 1], "C": [1, 0],
+    "D": [2, 2], "E": [2, 1], "F": [2, 0],
+    "G": [3, 2], "H": [3, 1],
+    "I": [4, 0],
+    "t": [5, 1]
+  }
 }

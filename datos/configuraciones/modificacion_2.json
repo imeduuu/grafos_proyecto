@@ -1,9 +1,9 @@
 {
   "nombre": "Modificación 2",
-  "descripcion": "TODO: describir qué se cambia y por qué (ej.: agregar un pasillo que crea una nueva alternativa).",
+  "descripcion": "Se agrega el pasillo C→t, un atajo directo hacia la salida.",
   "basada_en": "grafo_inicial.json",
   "arcos_bloqueados": [],
-  "arcos_agregados": [],
+  "arcos_agregados": [["C", "t"]],
   "entrada": "s",
   "salida": "t"
 }

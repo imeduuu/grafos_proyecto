@@ -1,8 +1,8 @@
 {
   "nombre": "Modificación 1",
-  "descripcion": "TODO: describir qué se cambia y por qué (ej.: bloquear un pasillo crítico).",
+  "descripcion": "Se bloquea el pasillo D→G, que pertenece al corte mínimo de la red original.",
   "basada_en": "grafo_inicial.json",
-  "arcos_bloqueados": [],
+  "arcos_bloqueados": [["D", "G"]],
   "arcos_agregados": [],
   "entrada": "s",
   "salida": "t"

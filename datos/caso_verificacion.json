@@ -1,16 +1,26 @@
 {
-  "descripcion": "TODO: caso pequeño (4 a 6 vértices) resuelto a mano para la sección de verificación del informe.",
-  "vertices": [],
-  "arcos": [],
+  "descripcion": "Caso pequeño (5 vértices, 7 arcos) resuelto a mano para la sección de verificación del informe.",
+  "vertices": ["s", "a", "b", "c", "t"],
+  "arcos": [
+    ["s", "a"], ["s", "b"],
+    ["a", "b"], ["a", "c"],
+    ["b", "c"], ["b", "t"],
+    ["c", "t"]
+  ],
   "entrada": "s",
   "salida": "t",
-  "posiciones": {},
+  "posiciones": {
+    "s": [0, 1],
+    "a": [1, 2], "b": [1, 0],
+    "c": [2, 2],
+    "t": [3, 1]
+  },
   "resultado_manual_esperado": {
-    "existe_camino": null,
-    "longitud_minima": null,
-    "camino_minimo_ejemplo": [],
-    "max_caminos_sin_arcos_compartidos": null,
-    "caminos_disjuntos_ejemplo": [],
-    "corte_minimo_ejemplo": []
+    "existe_camino": true,
+    "longitud_minima": 2,
+    "camino_minimo_ejemplo": ["s", "b", "t"],
+    "max_caminos_sin_arcos_compartidos": 2,
+    "caminos_disjuntos_ejemplo": [["s", "a", "c", "t"], ["s", "b", "t"]],
+    "corte_minimo_ejemplo": [["s", "a"], ["s", "b"]]
   }
 }
