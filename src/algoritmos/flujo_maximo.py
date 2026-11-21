@@ -1,110 +1,98 @@
-"""Máximo número de caminos s-t sin arcos compartidos mediante flujo máximo.
-
-Cada arco activo recibe capacidad 1 y se aplica Edmonds-Karp (caminos
-aumentantes encontrados con BFS). El valor del flujo máximo es igual al
-número máximo de caminos sin arcos compartidos. Como el grafo no permite
-arcos recíprocos, el arco inverso de la red residual nunca choca con un
-arco real.
-"""
-
+"""Edmonds-Karp con capacidad unitaria: caminos dirigidos sin arcos compartidos."""
+from collections import deque
 from typing import Dict, List, Optional, Tuple
 from src.modelo.grafo import GrafoDirigido
 
 RedResidual = Dict[str, Dict[str, int]]
 
+
 def construir_red_residual(grafo: GrafoDirigido) -> RedResidual:
-    """Construye la red residual inicial con capacidad unitaria.
-
-    Asigna capacidad 1 a cada arco activo (u, v) y 0 a su inverso (v, u).
-
-    Parámetros:
-        grafo: laberinto del que se toman los arcos activos.
-
-    Retorna:
-        Diccionario residual[u][v] con la capacidad residual de cada arco.
-    """
-    raise NotImplementedError("TODO: implementar construir_red_residual")
+    """Crea capacidades 1 en arcos activos y 0 en sus inversos."""
+    residual = {vertice: {} for vertice in grafo.vertices}
+    for u, v in grafo.arcos_activos():
+        residual[u][v] = 1
+        residual[v].setdefault(u, 0)
+    return residual
 
 
 def buscar_camino_aumentante(residual: RedResidual, origen: str, destino: str) -> Optional[List[str]]:
-    """Busca un camino aumentante con BFS en la red residual.
-
-    Solo recorre arcos con capacidad residual mayor que 0.
-
-    Parámetros:
-        residual: red residual actual.
-        origen: vértice fuente s.
-        destino: vértice sumidero t.
-
-    Retorna:
-        Lista de vértices del camino aumentante, o None si no existe.
-    """
-    raise NotImplementedError("TODO: implementar buscar_camino_aumentante")
+    """BFS de capacidades residuales positivas; retorna camino o None."""
+    if origen == destino:
+        return None
+    cola = deque([origen])
+    padres = {origen: None}
+    while cola:
+        u = cola.popleft()
+        for v, capacidad in residual[u].items():
+            if capacidad > 0 and v not in padres:
+                padres[v] = u
+                if v == destino:
+                    camino = [destino]
+                    while camino[-1] != origen:
+                        camino.append(padres[camino[-1]])
+                    camino.reverse()
+                    return camino
+                cola.append(v)
+    return None
 
 
 def aumentar_flujo(residual: RedResidual, camino: List[str]) -> None:
-    """Envía una unidad de flujo por el camino aumentante.
-
-    Resta 1 a la capacidad de cada arco (u, v) del camino y suma 1 a su
-    inverso (v, u). Modifica ``residual`` en el lugar.
-
-    Parámetros:
-        residual: red residual que se actualiza.
-        camino: lista de vértices del camino aumentante.
-
-    Retorna:
-        None.
-    """
-    raise NotImplementedError("TODO: implementar aumentar_flujo")
+    """Envía una unidad por el camino, actualizando arcos directos e inversos."""
+    for u, v in zip(camino, camino[1:]):
+        if residual[u][v] <= 0:
+            raise ValueError(f"No queda capacidad residual para {u}->{v}.")
+        residual[u][v] -= 1
+        residual[v][u] += 1
 
 
 def flujo_maximo_unitario(grafo: GrafoDirigido, origen: str, destino: str) -> Tuple[int, RedResidual]:
-    """Calcula el flujo máximo con capacidad 1 por arco (Edmonds-Karp).
-
-    Repite buscar un camino aumentante y aumentar el flujo hasta que no
-    quede ninguno.
-
-    Parámetros:
-        grafo: laberinto (solo arcos activos).
-        origen: vértice fuente s.
-        destino: vértice sumidero t.
-
-    Retorna:
-        Tupla (valor_flujo, residual_final).
-    """
-    raise NotImplementedError("TODO: implementar flujo_maximo_unitario")
+    """Devuelve valor máximo del flujo y red residual final."""
+    grafo._exigir_vertice(origen)
+    grafo._exigir_vertice(destino)
+    if origen == destino:
+        raise ValueError("La entrada y la salida deben ser distintas.")
+    residual = construir_red_residual(grafo)
+    valor = 0
+    while True:
+        camino = buscar_camino_aumentante(residual, origen, destino)
+        if camino is None:
+            break
+        aumentar_flujo(residual, camino)
+        valor += 1
+    return valor, residual
 
 
 def descomponer_en_caminos(grafo: GrafoDirigido, residual: RedResidual, origen: str, destino: str) -> List[List[str]]:
-    """Descompone el flujo máximo en caminos s-t.
-
-    Un arco original activo lleva flujo si su capacidad residual quedó en 0.
-    Desde el origen se siguen arcos con flujo aún no usados hasta llegar al
-    destino.
-
-    Parámetros:
-        grafo: laberinto original (para saber qué arcos son reales y activos).
-        residual: red residual final del flujo máximo.
-        origen: vértice fuente s.
-        destino: vértice sumidero t.
-
-    Retorna:
-        Lista de caminos (listas de vértices) que no comparten arcos.
-    """
-    raise NotImplementedError("TODO: implementar descomponer_en_caminos")
+    """Extrae caminos s-t del flujo final evitando ciclos y reutilización de arcos."""
+    # En capacidades unitarias, capacidad residual 0 en un arco original
+    # significa que circula una unidad de flujo por él.
+    arcos_con_flujo = {(u, v) for u, v in grafo.arcos_activos() if residual[u][v] == 0}
+    caminos = []
+    while True:
+        pila = [(origen, [origen])]
+        encontrado = None
+        while pila:
+            u, camino = pila.pop()
+            if u == destino:
+                encontrado = camino
+                break
+            for v in grafo.sucesores(u):
+                if (u, v) in arcos_con_flujo and v not in camino:
+                    pila.append((v, camino + [v]))
+        if encontrado is None:
+            break
+        caminos.append(encontrado)
+        for arco in zip(encontrado, encontrado[1:]):
+            arcos_con_flujo.remove(arco)
+    return caminos
 
 
 def maximo_caminos_disjuntos(grafo: GrafoDirigido, origen: str, destino: str) -> Tuple[int, List[List[str]]]:
-    """Función principal: máximo número de caminos s-t sin arcos compartidos.
-
-    Usa solo arcos activos.
-
-    Parámetros:
-        grafo: laberinto sobre el que se calcula.
-        origen: vértice de entrada s.
-        destino: vértice de salida t.
-
-    Retorna:
-        Tupla (cantidad, caminos); (0, []) si no existe camino.
-    """
-    raise NotImplementedError("TODO: implementar maximo_caminos_disjuntos")
+    """Obtiene máxima cantidad y caminos concretos sin arcos comunes."""
+    valor, residual = flujo_maximo_unitario(grafo, origen, destino)
+    if valor == 0:
+        return 0, []
+    caminos = descomponer_en_caminos(grafo, residual, origen, destino)
+    if len(caminos) != valor:
+        raise RuntimeError("No fue posible descomponer completamente el flujo máximo.")
+    return valor, caminos
