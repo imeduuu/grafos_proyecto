@@ -1,246 +1,516 @@
+
 # Simulador interactivo de laberintos y rutas alternativas
 
-**Teoría de Grafos – INFO1158 · Proyecto 1**
-Integrantes: Nicolás · Ricardo · Eduardo
-Entrega del informe y presentación: **jueves 26 de noviembre de 2026** (informe en Educa hasta las 23:00).
+**Teoría de Grafos – INFO1158 | Proyecto 1**
 
-Aplicación que modela un laberinto de pasillos de sentido único como un **grafo dirigido G = (V, E)** y permite:
+**Integrantes:** Eduardo, Ricardo y Nicolás.
 
-1. Encontrar un **camino mínimo** (menor número de pasillos) de la entrada `s` a la salida `t`.
-2. Calcular el **máximo número de caminos s→t que no comparten arcos** y mostrarlos.
-3. Encontrar un **corte mínimo**: el menor conjunto de pasillos cuyo bloqueo impide llegar de `s` a `t`.
-4. **Simular cambios** desde la interfaz: bloquear/restablecer pasillos, agregar pasillos y cambiar `s` y `t`.
-5. **Verificar** que |caminos disjuntos| = |corte mínimo| (teorema de Menger / flujo máximo–corte mínimo).
+**Fecha de presentación:** jueves 26 de noviembre de 2026.  
+**Entrega del informe:** jueves 26 de noviembre de 2026, hasta las 23:00 horas en Educa.
 
-> ⚠️ **Regla del enunciado:** los algoritmos (BFS, flujo máximo, corte mínimo) se implementan con **código propio**.
-> `networkx` se usa **solo para dibujar**. Prohibido usar `nx.shortest_path`, `nx.maximum_flow`, `nx.minimum_cut`, `nx.edge_disjoint_paths`, etc.
+## Descripción del proyecto
+
+Este proyecto consiste en un simulador interactivo de laberintos representados mediante un grafo dirigido G = (V, E).
+
+Los vértices representan posiciones o intersecciones y los arcos representan pasillos de sentido único.
+
+La aplicación permite:
+
+1. Encontrar un camino mínimo entre una entrada y una salida mediante BFS.
+2. Calcular el número máximo de caminos dirigidos sin arcos compartidos mediante flujo máximo.
+3. Identificar un corte mínimo de pasillos cuya eliminación impide llegar a la salida.
+4. Bloquear, restablecer y agregar pasillos desde una interfaz.
+5. Cambiar los vértices seleccionados como entrada y salida.
+6. Comparar la red original con dos modificaciones.
+7. Verificar matemáticamente los caminos y cortes obtenidos.
+
+Se utiliza Python para implementar los algoritmos y Streamlit para la interfaz interactiva.
+
+**Restricción importante:** todos los algoritmos matemáticos solicitados están implementados con código propio. NetworkX se utiliza exclusivamente para dibujar el grafo; no se emplea para calcular caminos mínimos, flujo máximo ni cortes mínimos.
 
 ---
 
-## Cómo ejecutar
+## Requisitos
 
-```bash
+- Python 3.11 o superior.
+- pip, para instalar dependencias.
+- Navegador web.
+- Entorno virtual de Python (recomendado).
+
+Dependencias declaradas en `requirements.txt`:
+
+- streamlit >= 1.30
+- networkx >= 3.0
+- matplotlib >= 3.7
+- pytest >= 7.0
+
+---
+
+## Cómo ejecutar el proyecto
+
+Abrir PowerShell en la carpeta principal del repositorio.
+
+### 1. Crear un entorno virtual (opcional)
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-streamlit run main.py              # abre la aplicación
-pytest                             # corre las pruebas
 ```
+
+### 2. Activar el entorno virtual
+
+En Windows con PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Si no se utiliza un entorno virtual, los siguientes comandos pueden ejecutarse directamente con Python instalado en el sistema.
+
+### 3. Instalar las dependencias
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+### 4. Ejecutar la aplicación
+
+```powershell
+python -m streamlit run main.py
+```
+
+La aplicación se abrirá normalmente en:
+
+http://localhost:8501
+
+Para detenerla, presionar Ctrl + C en la terminal.
+
+### 5. Ejecutar las pruebas
+
+```powershell
+python -m pytest -q
+```
+
+En la revisión del 24 de noviembre de 2026 se ejecutaron las pruebas disponibles y se obtuvo:
+
+```text
+64 passed
+```
+
+El resultado puede cambiar si posteriormente se agregan o modifican pruebas.
+
+---
+
+## Guía de uso
+
+### Simulación interactiva
+
+1. Abrir la pestaña **Simulación interactiva**.
+2. Seleccionar los vértices de entrada y salida en la barra lateral.
+3. Presionar **Aplicar entrada y salida**.
+4. Bloquear o restablecer pasillos mediante los controles laterales.
+5. Agregar pasillos dirigidos utilizando el formulario correspondiente.
+6. Presionar **Recalcular** para ejecutar los algoritmos.
+7. Utilizar el selector **Destacar** para visualizar diferentes resultados.
+8. Revisar el camino mínimo, los caminos independientes, el corte mínimo y las verificaciones.
+
+Cuando se modifica la red, la aplicación advierte que los resultados anteriores necesitan actualizarse.
+
+El botón **Restaurar red original** descarta las modificaciones interactivas y carga nuevamente el grafo inicial.
+
+### Comparación de configuraciones
+
+La pestaña **Comparación de configuraciones** muestra la red original y las dos modificaciones predefinidas.
+
+Incluye una tabla con los resultados y visualizaciones individuales de cada configuración.
+
+Para mantener una comparación consistente, las tres configuraciones utilizan la misma entrada `s` y salida `t`.
 
 ---
 
 ## Estructura del proyecto
 
-```
-laberintos-grafos/
-├── main.py                          # Punto de entrada (streamlit run main.py)
-├── requirements.txt                 # Dependencias
+```text
+grafos_proyecto/
+├── main.py
 ├── README.md
-├── datos/                           # Grafos en JSON
-│   ├── ejemplo_figura1.json         # Laberinto de la Figura 1 (para pruebas)
-│   ├── grafo_inicial.json           # Red principal del grupo (TODO)
-│   ├── caso_verificacion.json       # Caso de 4–6 vértices resuelto a mano (TODO)
+├── requirements.txt
+├── datos/
+│   ├── ejemplo_figura1.json
+│   ├── grafo_inicial.json
+│   ├── caso_verificacion.json
 │   └── configuraciones/
-│       ├── modificacion_1.json      # Primera modificación a comparar (TODO)
-│       └── modificacion_2.json      # Segunda modificación a comparar (TODO)
+│       ├── modificacion_1.json
+│       └── modificacion_2.json
 ├── src/
-│   ├── modelo/                      # Representación del grafo
+│   ├── modelo/
 │   │   ├── grafo.py
 │   │   ├── cargador.py
 │   │   └── validaciones.py
-│   ├── algoritmos/                  # Código propio de los algoritmos
-│   │   ├── busqueda_anchura.py      # BFS → camino mínimo
-│   │   ├── busqueda_profundidad.py  # DFS → para comparar con BFS
-│   │   ├── flujo_maximo.py          # Edmonds-Karp unitario → caminos sin arcos compartidos
-│   │   └── corte_minimo.py          # Corte mínimo desde la red residual
+│   ├── algoritmos/
+│   │   ├── busqueda_anchura.py
+│   │   ├── busqueda_profundidad.py
+│   │   ├── flujo_maximo.py
+│   │   └── corte_minimo.py
 │   ├── simulacion/
-│   │   └── configuraciones.py       # Resultados por configuración y comparación
+│   │   └── configuraciones.py
 │   ├── verificacion/
-│   │   └── verificador.py           # Comprobaciones automáticas (sección 5)
+│   │   └── verificador.py
 │   └── interfaz/
-│       ├── app.py                   # Aplicación Streamlit
-│       └── visualizacion.py         # Dibujo del grafo y colores
-├── tests/                           # Pruebas con pytest
+│       ├── app.py
+│       └── visualizacion.py
+├── tests/
 │   ├── conftest.py
 │   ├── test_grafo.py
+│   ├── test_cargador.py
+│   ├── test_validaciones.py
 │   ├── test_busquedas.py
 │   ├── test_flujo_y_corte.py
-│   └── test_caso_manual.py
+│   ├── test_caso_manual.py
+│   ├── test_verificador.py
+│   ├── test_visualizacion.py
+│   └── test_configuraciones.py
 └── docs/
-    ├── fuentes.md                   # Bibliografía académica/técnica
-    ├── informe/estructura_informe.md
-    ├── imagenes/                    # Capturas para el informe
-    └── presentacion/guion.md
+    ├── fuentes.md
+    ├── informe/
+    │   ├── seccion1_modelo.md
+    │   └── seccion5_verificacion.md
+    └── imagenes/
+        └── .gitkeep
 ```
+
+Los archivos `__init__.py` de los paquetes Python se omiten del árbol para facilitar la lectura.
 
 ---
 
-## Detalle de cada carpeta y archivo
+## Datos del laberinto
 
-### `datos/` — Grafos de entrada
+Los grafos y las configuraciones se almacenan mediante archivos JSON.
 
-Todos los grafos se guardan en JSON con el formato:
+### Red inicial del grupo
 
-```json
-{
-  "vertices": ["s", "A", "B", "t"],
-  "arcos": [["s", "A"], ["A", "B"], ["B", "t"]],
-  "entrada": "s",
-  "salida": "t",
-  "posiciones": {"s": [0, 0], "A": [1, 0]}
+Archivo: `datos/grafo_inicial.json`
+
+La configuración original contiene:
+
+- 11 vértices.
+- 16 arcos dirigidos.
+- Entrada: `s`.
+- Salida: `t`.
+- Sin lazos.
+- Sin arcos repetidos.
+- Sin arcos recíprocos.
+- Sin vértices aislados.
+- Al menos dos caminos dirigidos sin arcos compartidos entre `s` y `t`.
+
+Conjunto de vértices:
+
+V = {s, A, B, C, D, E, F, G, H, I, t}
+
+Conjunto de arcos:
+
+E = {
+(s,A), (s,B), (s,C),
+(A,B), (A,D),
+(B,D), (B,E),
+(C,E), (C,F),
+(F,E),
+(D,G), (E,H),
+(G,H), (G,t),
+(H,I), (I,t)
 }
-```
 
-| Archivo | Qué contiene |
+### Archivos de datos
+
+| Archivo | Descripción |
 |---|---|
-| `ejemplo_figura1.json` | La red de la Figura 1 del enunciado (9 vértices, 12 arcos). Se usa en las pruebas: d(s,t)=4, 2 caminos sin arcos compartidos, corte de tamaño 2. **No** es la red de entrega. |
-| `grafo_inicial.json` | Red principal del grupo. Debe cumplir: 10–12 vértices, 14–20 arcos, sin lazos, sin arcos repetidos, sin recíprocos, sin vértices aislados y al menos 2 caminos s→t sin arcos compartidos. |
-| `caso_verificacion.json` | Caso pequeño (4–6 vértices) resuelto a mano. Incluye `resultado_manual_esperado` para comparar con el código. |
-| `configuraciones/modificacion_1.json` y `_2.json` | Las dos modificaciones a comparar con la original (arcos bloqueados/agregados). **Mismos `s` y `t`** que la original. |
+| `ejemplo_figura1.json` | Grafo ilustrativo de la pauta con 9 vértices y 12 arcos. |
+| `grafo_inicial.json` | Red principal del grupo con 11 vértices y 16 arcos. |
+| `caso_verificacion.json` | Grafo pequeño utilizado para la comprobación manual y automática. |
+| `modificacion_1.json` | Bloquea el pasillo D→G. |
+| `modificacion_2.json` | Agrega el pasillo C→t. |
 
-### `src/modelo/` — Representación del laberinto
+La primera modificación elimina temporalmente una conexión importante, reduciendo la cantidad de caminos disponibles.
 
-Aquí definimos el grafo dirigido, que es la base de todo lo demás.
-
-**`grafo.py`** — clase `GrafoDirigido` (lista de adyacencia + conjunto de arcos bloqueados).
-
-| Función | Qué hace |
-|---|---|
-| `agregar_vertice(vertice)` | Agrega un vértice. |
-| `agregar_arco(origen, destino)` | Agrega un pasillo dirigido; rechaza lazos, repetidos y recíprocos (`ValueError`). |
-| `bloquear_arco(origen, destino)` | Bloquea un pasillo sin borrarlo. |
-| `restablecer_arco(origen, destino)` | Quita el bloqueo. |
-| `esta_bloqueado(origen, destino)` | Indica si un pasillo está bloqueado. |
-| `definir_entrada_salida(entrada, salida)` | Define `s` y `t` (deben existir y ser distintos). |
-| `sucesores(vertice)` | Vecinos por arcos **activos** (lo que usan los algoritmos). |
-| `arcos()` / `arcos_activos()` | Todos los arcos / solo los no bloqueados. |
-| `existe_arco(origen, destino)` | Indica si el arco existe. |
-| `cantidad_vertices()` / `cantidad_arcos()` | Retornan \|V\| y \|E\|. |
-| `copiar()` | Copia independiente (para comparar configuraciones). |
-
-**`cargador.py`** — lectura y escritura de JSON.
-
-| Función | Qué hace |
-|---|---|
-| `cargar_grafo_json(ruta)` | Crea un `GrafoDirigido` desde un JSON. |
-| `guardar_grafo_json(grafo, ruta)` | Guarda el grafo actual en JSON. |
-| `cargar_configuracion(ruta_base, ruta_modificacion)` | Carga la red original y le aplica una modificación. |
-
-**`validaciones.py`** — restricciones de la configuración inicial.
-
-| Función | Qué hace |
-|---|---|
-| `tiene_lazos(grafo)` | Detecta arcos (v, v). |
-| `tiene_arcos_reciprocos(grafo)` | Detecta (u, v) y (v, u) a la vez. |
-| `vertices_aislados(grafo)` | Lista los vértices sin arcos. |
-| `validar_configuracion_inicial(grafo)` | Revisa todas las restricciones y retorna la lista de errores. |
-
-### `src/algoritmos/` — Algoritmos con código propio
-
-**`busqueda_anchura.py`** — camino mínimo con BFS. Garantiza la menor cantidad de arcos porque recorre el grafo por niveles. O(\|V\|+\|E\|).
-
-| Función | Qué hace |
-|---|---|
-| `busqueda_en_anchura(grafo, origen)` | Retorna `distancias` y `predecesores`. |
-| `reconstruir_camino(predecesores, origen, destino)` | Arma la lista `[s, ..., t]` siguiendo los predecesores hacia atrás. |
-| `camino_minimo(grafo, origen, destino)` | Función principal: `(camino, longitud)` o `(None, None)` si no hay camino. |
-
-**`busqueda_profundidad.py`** — DFS, implementada para comparar con BFS en el informe (encuentra un camino, pero no necesariamente el más corto).
-
-| Función | Qué hace |
-|---|---|
-| `busqueda_en_profundidad(grafo, origen, destino)` | Retorna un camino cualquiera o `None`. |
-| `existe_camino(grafo, origen, destino)` | Indica si `t` es alcanzable desde `s`. |
-
-**`flujo_maximo.py`** — máximo número de caminos sin arcos compartidos, usando flujo máximo con capacidad 1 por arco (Edmonds-Karp).
-
-| Función | Qué hace |
-|---|---|
-| `construir_red_residual(grafo)` | Capacidad 1 en cada arco activo y 0 en su inverso. |
-| `buscar_camino_aumentante(residual, origen, destino)` | BFS sobre arcos con capacidad residual > 0. |
-| `aumentar_flujo(residual, camino)` | Envía 1 unidad por el camino y actualiza la red residual. |
-| `flujo_maximo_unitario(grafo, origen, destino)` | Repite hasta que no haya más caminos aumentantes; retorna `(valor, residual)`. |
-| `descomponer_en_caminos(grafo, residual, origen, destino)` | Extrae los caminos concretos a partir del flujo. |
-| `maximo_caminos_disjuntos(grafo, origen, destino)` | Función principal: `(cantidad, caminos)`. |
-
-**`corte_minimo.py`** — conjunto mínimo de pasillos que desconecta `s` de `t`.
-
-| Función | Qué hace |
-|---|---|
-| `alcanzables_en_residual(residual, origen)` | Conjunto S de vértices alcanzables en la red residual final. |
-| `corte_minimo(grafo, origen, destino)` | Arcos (u, v) con u ∈ S y v ∉ S. Retorna `[]` si ya no hay camino. |
-
-### `src/simulacion/` — Configuraciones y comparación
-
-**`configuraciones.py`**
-
-| Elemento | Qué hace |
-|---|---|
-| `ResultadoConfiguracion` (dataclass) | Guarda los resultados de una configuración: existe camino, camino mínimo, longitud, caminos disjuntos y corte. |
-| `calcular_resultados(grafo, nombre)` | Ejecuta todos los algoritmos (es el botón “Recalcular”). |
-| `comparar_configuraciones(resultados)` | Arma la tabla comparativa original / mod. 1 / mod. 2. |
-
-### `src/verificacion/` — Comprobaciones (sección 5)
-
-**`verificador.py`**
-
-| Función | Qué comprueba |
-|---|---|
-| `verificar_camino_valido(grafo, camino, origen, destino)` | El camino va de s a t usando solo arcos activos y en su sentido. |
-| `verificar_sin_arcos_compartidos(caminos)` | Ningún arco se repite entre caminos (los vértices sí pueden repetirse). |
-| `verificar_corte_desconecta(grafo, corte, origen, destino)` | Al bloquear el corte ya no hay camino s→t. |
-| `verificar_igualdad_menger(cantidad_caminos, corte)` | \|caminos\| = \|corte\|. |
-| `verificar_todo(grafo, resultado)` | Ejecuta todas las comprobaciones y retorna un diccionario de ✔/✘. |
-
-### `src/interfaz/` — Aplicación visual (Streamlit)
-
-**`visualizacion.py`** — dibujo del grafo con flechas y colores distintos para cada solución.
-
-| Función | Qué hace |
-|---|---|
-| `calcular_posiciones(grafo)` | Usa las posiciones del JSON o una distribución automática. |
-| `dibujar_grafo(grafo, camino_minimo, caminos_disjuntos, corte, modo)` | Retorna la figura de matplotlib con la solución destacada. |
-
-Colores: camino mínimo en **azul**, cada camino disjunto en un color distinto, corte mínimo en **rojo punteado** y arcos bloqueados en **gris**.
-
-**`app.py`** — la aplicación.
-
-| Función | Qué hace |
-|---|---|
-| `inicializar_estado()` | Carga el grafo inicial en `st.session_state`. |
-| `panel_seleccion_extremos()` | Selectores de `s` y `t`. |
-| `panel_bloqueos()` | Bloquear/restablecer un pasillo. |
-| `panel_agregar_arco()` | Formulario para agregar un pasillo (muestra errores si es lazo, repetido o recíproco). |
-| `panel_resultados()` | Botón *Recalcular*, dibujo y resultados con verificaciones. |
-| `panel_comparacion()` | Tabla de las tres configuraciones. |
-| `ejecutar_aplicacion()` | Arma la página completa. |
-
-### `tests/` — Pruebas (pytest)
-
-| Archivo | Qué prueba |
-|---|---|
-| `conftest.py` | Fixture `grafo_figura1` con la red del enunciado. |
-| `test_grafo.py` | Rechazo de lazos y recíprocos; bloquear y restablecer. |
-| `test_busquedas.py` | d(s,t)=4 en la Figura 1; sin camino no se entrega longitud. |
-| `test_flujo_y_corte.py` | 2 caminos disjuntos en la Figura 1; el corte desconecta y tiene el mismo tamaño. |
-| `test_caso_manual.py` | Compara el caso resuelto a mano con el código (quitar el `skip` cuando esté listo). |
-
-### `docs/` — Material para el informe y la presentación
-
-| Archivo/carpeta | Uso |
-|---|---|
-| `fuentes.md` | Bibliografía (obligatorio citar fuentes académicas/técnicas). |
-| `informe/estructura_informe.md` | Índice del informe, alineado con la rúbrica. |
-| `imagenes/` | Capturas de la app y del caso manual. |
-| `presentacion/guion.md` | Reparto de los 12 minutos entre los tres. |
+La segunda incorpora un atajo hacia la salida y aumenta la disponibilidad de caminos independientes.
 
 ---
 
-## Orden de dependencias (qué se necesita primero)
+## Resultados de las configuraciones
 
+Los resultados se obtienen ejecutando los algoritmos sobre la red original y cada modificación.
+
+| Configuración | d(s,t) | Caminos sin arcos compartidos | Corte mínimo |
+|---|---:|---:|---|
+| Original | 4 | 2 | {D→G, E→H} |
+| Mod. 1 (bloquea D→G) | 5 | 1 | {E→H} |
+| Mod. 2 (agrega C→t) | 2 | 3 | {s→A, s→B, s→C} |
+
+### Interpretación
+
+**Configuración original**
+
+Existe un camino mínimo de longitud 4 y se pueden encontrar dos caminos dirigidos sin arcos compartidos.
+
+El corte mínimo contiene dos pasillos: D→G y E→H.
+
+**Modificación 1**
+
+Al bloquear D→G, el camino mínimo aumenta de 4 a 5 arcos.
+
+La cantidad máxima de caminos sin arcos compartidos disminuye de 2 a 1.
+
+El corte mínimo restante contiene E→H.
+
+**Modificación 2**
+
+Al agregar C→t, aparece un camino mínimo de longitud 2.
+
+La cantidad máxima de caminos independientes aumenta a 3.
+
+El corte mínimo está formado por s→A, s→B y s→C.
+
+En las tres configuraciones se cumple la igualdad entre la cantidad máxima de caminos sin arcos compartidos y la cardinalidad del corte mínimo.
+
+---
+
+## Módulos del proyecto
+
+### 1. Modelo del grafo
+
+Carpeta: `src/modelo/`
+
+**grafo.py**
+
+Contiene la clase `GrafoDirigido`, responsable de almacenar vértices y arcos mediante listas de adyacencia.
+
+Funciones y métodos principales:
+
+| Función | Descripción |
+|---|---|
+| `agregar_vertice` | Incorpora un vértice. |
+| `agregar_arco` | Incorpora un arco dirigido válido. |
+| `bloquear_arco` | Desactiva temporalmente un pasillo. |
+| `restablecer_arco` | Reactiva un pasillo bloqueado. |
+| `sucesores` | Obtiene los sucesores mediante arcos activos. |
+| `arcos` | Obtiene todos los arcos. |
+| `arcos_activos` | Obtiene los arcos no bloqueados. |
+| `existe_arco` | Comprueba la existencia de un arco. |
+| `esta_bloqueado` | Comprueba si un arco está bloqueado. |
+| `cantidad_vertices` | Retorna la cantidad de vértices. |
+| `cantidad_arcos` | Retorna la cantidad de arcos. |
+| `definir_entrada_salida` | Establece la entrada y salida del laberinto. |
+| `copiar` | Genera una copia independiente del grafo. |
+
+**cargador.py**
+
+| Función | Descripción |
+|---|---|
+| `cargar_grafo_json` | Carga un grafo desde un archivo JSON. |
+| `guardar_grafo_json` | Guarda un grafo en JSON. |
+| `cargar_configuracion` | Carga la red base y aplica una modificación. |
+
+**validaciones.py**
+
+| Función | Descripción |
+|---|---|
+| `tiene_lazos` | Detecta lazos. |
+| `tiene_arcos_reciprocos` | Detecta arcos en ambos sentidos. |
+| `vertices_aislados` | Encuentra vértices aislados. |
+| `validar_configuracion_inicial` | Comprueba las restricciones de la pauta. |
+
+### 2. Algoritmos
+
+Carpeta: `src/algoritmos/`
+
+Todos los algoritmos son implementaciones propias en Python.
+
+**busqueda_anchura.py — BFS**
+
+| Función | Descripción |
+|---|---|
+| `busqueda_en_anchura` | Recorre el grafo por niveles. |
+| `reconstruir_camino` | Reconstruye el recorrido mediante predecesores. |
+| `camino_minimo` | Obtiene un camino con el menor número de arcos. |
+
+BFS garantiza el camino mínimo en grafos no ponderados porque explora los vértices por niveles.
+
+Complejidad temporal: O(|V| + |E|).
+
+**busqueda_profundidad.py — DFS**
+
+| Función | Descripción |
+|---|---|
+| `busqueda_en_profundidad` | Busca un camino utilizando una pila. |
+| `existe_camino` | Determina si un destino es alcanzable. |
+
+DFS puede encontrar una ruta válida, pero no garantiza que tenga la menor cantidad de arcos.
+
+**flujo_maximo.py — Edmonds-Karp**
+
+| Función | Descripción |
+|---|---|
+| `construir_red_residual` | Construye la red con capacidades unitarias. |
+| `buscar_camino_aumentante` | Busca una ruta con capacidad residual positiva. |
+| `aumentar_flujo` | Actualiza las capacidades residuales. |
+| `flujo_maximo_unitario` | Calcula el flujo máximo. |
+| `descomponer_en_caminos` | Reconstruye los caminos que transportan flujo. |
+| `maximo_caminos_disjuntos` | Obtiene el máximo de caminos sin arcos compartidos. |
+
+Cada arco activo tiene capacidad 1, lo cual impide que dos unidades de flujo utilicen el mismo pasillo simultáneamente.
+
+Edmonds-Karp utiliza BFS para encontrar caminos aumentantes.
+
+Complejidad general: O(|V| · |E|²).
+
+**corte_minimo.py — Corte mínimo**
+
+| Función | Descripción |
+|---|---|
+| `alcanzables_en_residual` | Obtiene los vértices alcanzables en la red residual. |
+| `corte_minimo` | Encuentra un conjunto mínimo de arcos que desconecta entrada y salida. |
+
+Se utiliza la red residual final del flujo máximo para determinar el conjunto S de vértices alcanzables desde la entrada.
+
+Los arcos que salen de S hacia fuera de S forman el corte mínimo.
+
+Por el teorema de flujo máximo–corte mínimo, su cardinalidad coincide con el máximo número de caminos sin arcos compartidos.
+
+### 3. Simulación de configuraciones
+
+Archivo: `src/simulacion/configuraciones.py`
+
+| Elemento | Descripción |
+|---|---|
+| `ResultadoConfiguracion` | Clase de datos que almacena los resultados. |
+| `calcular_resultados` | Ejecuta los algoritmos para una configuración. |
+| `formatear_camino` | Convierte un camino en texto con flechas. |
+| `formatear_corte` | Convierte el corte en una representación textual. |
+| `comparar_configuraciones` | Construye la tabla comparativa. |
+
+Los resultados incluyen existencia de caminos, longitud mínima, rutas independientes y corte mínimo.
+
+Cuando no existe un camino, la aplicación no presenta una distancia numérica válida. El número de caminos es cero y el corte mínimo es el conjunto vacío.
+
+### 4. Verificación de resultados
+
+Archivo: `src/verificacion/verificador.py`
+
+| Función | Descripción |
+|---|---|
+| `verificar_camino_valido` | Comprueba que el recorrido utiliza arcos activos en el sentido correcto. |
+| `verificar_sin_arcos_compartidos` | Comprueba que las rutas no repiten arcos entre sí. |
+| `verificar_corte_desconecta` | Comprueba que bloquear el corte impide llegar al destino. |
+| `verificar_igualdad_menger` | Comprueba la igualdad entre caminos y corte. |
+| `verificar_todo` | Ejecuta las verificaciones anteriores. |
+
+El verificador utiliza una búsqueda independiente para comprobar la conectividad sin depender de los algoritmos que está evaluando.
+
+### 5. Interfaz y visualización
+
+Carpeta: `src/interfaz/`
+
+**visualizacion.py**
+
+| Función | Descripción |
+|---|---|
+| `calcular_posiciones` | Determina las posiciones de los vértices. |
+| `dibujar_grafo` | Representa el grafo dirigido mediante NetworkX y Matplotlib. |
+
+La visualización distingue:
+
+- Camino mínimo en azul.
+- Caminos sin arcos compartidos con diferentes colores.
+- Corte mínimo en rojo punteado.
+- Pasillos bloqueados en gris claro.
+- Entrada y salida mediante bordes diferenciados.
+
+**app.py**
+
+| Función | Descripción |
+|---|---|
+| `inicializar_estado` | Carga el grafo inicial en la sesión. |
+| `panel_seleccion_extremos` | Permite seleccionar entrada y salida. |
+| `panel_bloqueos` | Bloquea y restablece pasillos. |
+| `panel_agregar_arco` | Permite agregar pasillos válidos. |
+| `panel_restaurar` | Restaura la red original. |
+| `panel_resultados` | Muestra los cálculos, gráficos y verificaciones. |
+| `panel_comparacion` | Compara las tres configuraciones. |
+| `ejecutar_aplicacion` | Organiza e inicia la aplicación Streamlit. |
+
+La interfaz tiene dos pestañas principales:
+
+1. **Simulación interactiva:** permite modificar el grafo y recalcular los resultados.
+2. **Comparación de configuraciones:** muestra la red original y las dos modificaciones.
+
+---
+
+## Pruebas automatizadas
+
+Las pruebas están desarrolladas con pytest y se encuentran en la carpeta `tests/`.
+
+| Archivo | Qué verifica |
+|---|---|
+| `conftest.py` | Configuración compartida para las pruebas. |
+| `test_grafo.py` | Métodos y restricciones de la clase GrafoDirigido. |
+| `test_cargador.py` | Carga y manejo de archivos JSON. |
+| `test_validaciones.py` | Validación matemática de la red inicial. |
+| `test_busquedas.py` | BFS, DFS y casos sin camino. |
+| `test_flujo_y_corte.py` | Flujo máximo, rutas independientes y corte mínimo. |
+| `test_caso_manual.py` | Contraste entre resultados manuales y algoritmos. |
+| `test_verificador.py` | Comprobaciones independientes de los resultados. |
+| `test_visualizacion.py` | Funciones de representación gráfica. |
+| `test_configuraciones.py` | Cálculo y comparación de configuraciones. |
+
+Para ejecutar todas las pruebas:
+
+```powershell
+python -m pytest -q
 ```
-modelo/grafo.py ──► modelo/cargador.py ──► algoritmos/* ──► simulacion/ ──► interfaz/
-                                              │
-                                              └──► verificacion/
+
+Resultado registrado:
+
+```text
+64 passed
 ```
+
+---
+
+## Documentación
+
+Los siguientes archivos de documentación están presentes en la versión revisada del repositorio.
+
+| Archivo o carpeta | Contenido |
+|---|---|
+| `docs/fuentes.md` | Fuentes académicas y técnicas utilizadas. |
+| `docs/informe/seccion1_modelo.md` | Modelación matemática del laberinto. |
+| `docs/informe/seccion5_verificacion.md` | Verificación manual y matemática. |
+| `docs/imagenes/` | Carpeta preparada para incorporar imágenes y capturas. |
+
+
+---
+
+## Fundamento matemático
+
+El proyecto utiliza conceptos de teoría de grafos y algoritmos clásicos.
+
+**Camino mínimo:** BFS obtiene la menor cantidad de arcos entre la entrada y la salida en un grafo no ponderado.
+
+**Caminos sin arcos compartidos:** el flujo máximo con capacidad unitaria determina el número máximo de rutas dirigidas que no reutilizan pasillos.
+
+**Corte mínimo:** la red residual final permite identificar el conjunto mínimo de arcos que desconecta el origen del destino.
+
+La relación matemática fundamental es:
+
+Máximo número de caminos sin arcos compartidos = tamaño del corte mínimo.
+
+Esta igualdad está fundamentada en el teorema de flujo máximo–corte mínimo y la versión por arcos del teorema de Menger.
+
+---
+
+## Consideraciones finales
+
+El proyecto cumple su propósito de representar un laberinto dirigido, resolver problemas de conectividad y analizar modificaciones de la red.
+
+Los algoritmos matemáticos están desarrollados mediante código propio, mientras que Streamlit, NetworkX y Matplotlib proporcionan la interfaz y la visualización.
+
+El código fuente, sus dependencias, los datos de prueba y las instrucciones de ejecución están organizados en este repositorio.
