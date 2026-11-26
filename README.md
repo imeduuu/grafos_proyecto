@@ -73,7 +73,7 @@ streamlit run main.py
 pytest -p no:anyio -v
 ```
 
-La aplicación se abrirá normalmente en <http://localhost:8501>. Para detenerla, presiona Ctrl+C en la terminal. La última ejecución registrada obtuvo 64 pruebas aprobadas; el resultado puede cambiar si se agregan o modifican pruebas.
+La aplicación se abrirá normalmente en <http://localhost:8501>. Para detenerla, presiona Ctrl+C en la terminal. La última ejecución registrada obtuvo 79 pruebas aprobadas; el resultado puede cambiar si se agregan o modifican pruebas.
 
 ---
 
@@ -145,7 +145,10 @@ grafos_proyecto/
 │   ├── test_caso_manual.py
 │   ├── test_verificador.py
 │   ├── test_visualizacion.py
-│   └── test_configuraciones.py
+│   ├── test_configuraciones.py
+│   ├── test_pauta_configuraciones.py
+│   ├── test_codigo_propio.py
+│   └── test_app.py
 └── docs/
     └── fuentes.md
 ```
@@ -432,6 +435,9 @@ Las pruebas están desarrolladas con pytest y se encuentran en la carpeta `tests
 | `test_verificador.py` | Comprobaciones independientes de los resultados. |
 | `test_visualizacion.py` | Funciones de representación gráfica. |
 | `test_configuraciones.py` | Cálculo y comparación de configuraciones. |
+| `test_pauta_configuraciones.py` | Resultados de las tres configuraciones, caso sin camino y cambios desde la interfaz según la pauta. |
+| `test_codigo_propio.py` | Los módulos de cálculo no importan bibliotecas de grafos y toda función pública tiene docstring. |
+| `test_app.py` | Interfaz de Streamlit sin navegador (AppTest): recálculo, bloqueos, rechazos y pestaña de comparación. |
 
 Para ejecutar todas las pruebas:
 
@@ -442,7 +448,7 @@ pytest -p no:anyio -v
 Resultado registrado:
 
 ```text
-64 passed
+79 passed
 ```
 
 ---
