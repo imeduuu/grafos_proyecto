@@ -1,4 +1,9 @@
-"""Edmonds-Karp con capacidad unitaria: caminos dirigidos sin arcos compartidos."""
+"""Flujo máximo de Edmonds-Karp con capacidad unitaria por arco.
+
+La complejidad temporal general es O(|V|·|E|²). El algoritmo, la búsqueda
+de caminos aumentantes y la descomposición del flujo se implementan con
+estructuras básicas de Python, sin bibliotecas externas para el cálculo.
+"""
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 from src.modelo.grafo import GrafoDirigido

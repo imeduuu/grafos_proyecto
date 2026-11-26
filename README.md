@@ -8,6 +8,8 @@
 **Fecha de presentación:** jueves 26 de noviembre de 2026.  
 **Entrega del informe:** jueves 26 de noviembre de 2026, hasta las 23:00 horas en Educa.
 
+**Repositorio:** https://github.com/imeduuu/grafos_proyecto
+
 ## Descripción del proyecto
 
 Este proyecto consiste en un simulador interactivo de laberintos representados mediante un grafo dirigido G = (V, E).
@@ -35,68 +37,44 @@ Se utiliza Python para implementar los algoritmos y Streamlit para la interfaz i
 - Python 3.11 o superior.
 - pip, para instalar dependencias.
 - Navegador web.
-- Entorno virtual de Python (recomendado).
+- Entorno virtual de Python.
 
 Dependencias declaradas en `requirements.txt`:
 
-- streamlit >= 1.30
-- networkx >= 3.0
-- matplotlib >= 3.7
-- pytest >= 7.0
+- `streamlit >= 1.49.0`: interfaz; esta versión admite `width="stretch"`.
+- `networkx >= 3.0`: exclusivamente para dibujar el grafo.
+- `matplotlib >= 3.7`: renderizado de figuras.
+- `pytest >= 7.0`: pruebas automatizadas.
 
 ---
 
 ## Cómo ejecutar el proyecto
 
-Abrir PowerShell en la carpeta principal del repositorio.
+Ejecuta los comandos desde la carpeta raíz del repositorio.
 
-### 1. Crear un entorno virtual (opcional)
+### Windows (PowerShell)
 
 ```powershell
 python -m venv .venv
-```
-
-### 2. Activar el entorno virtual
-
-En Windows con PowerShell:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-Si no se utiliza un entorno virtual, los siguientes comandos pueden ejecutarse directamente con Python instalado en el sistema.
-
-### 3. Instalar las dependencias
-
-```powershell
 python -m pip install -r requirements.txt
+streamlit run main.py
+pytest -p no:anyio -v
 ```
 
-### 4. Ejecutar la aplicación
+Si PowerShell impide activar el entorno virtual, ejecuta `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` en esa misma terminal y vuelve a activar `.venv`.
 
-```powershell
-python -m streamlit run main.py
+### Linux y macOS (Bash/Zsh)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+streamlit run main.py
+pytest -p no:anyio -v
 ```
 
-La aplicación se abrirá normalmente en:
-
-http://localhost:8501
-
-Para detenerla, presionar Ctrl + C en la terminal.
-
-### 5. Ejecutar las pruebas
-
-```powershell
-python -m pytest -q
-```
-
-En la revisión del 24 de noviembre de 2026 se ejecutaron las pruebas disponibles y se obtuvo:
-
-```text
-64 passed
-```
-
-El resultado puede cambiar si posteriormente se agregan o modifican pruebas.
+La aplicación se abrirá normalmente en <http://localhost:8501>. Para detenerla, presiona Ctrl+C en la terminal. La última ejecución registrada obtuvo 64 pruebas aprobadas; el resultado puede cambiar si se agregan o modifican pruebas.
 
 ---
 
@@ -464,7 +442,7 @@ Las pruebas están desarrolladas con pytest y se encuentran en la carpeta `tests
 Para ejecutar todas las pruebas:
 
 ```powershell
-python -m pytest -q
+pytest -p no:anyio -v
 ```
 
 Resultado registrado:
@@ -485,6 +463,20 @@ Los siguientes archivos de documentación están presentes en la versión revisa
 | `docs/informe/seccion1_modelo.md` | Modelación matemática del laberinto. |
 | `docs/informe/seccion5_verificacion.md` | Verificación manual y matemática. |
 | `docs/imagenes/` | Carpeta preparada para incorporar imágenes y capturas. |
+
+Las fuentes académicas y técnicas consultadas están identificadas en [`docs/fuentes.md`](docs/fuentes.md).
+
+## Cumplimiento de la pauta
+
+| Requisito | Archivo o función que lo cumple | Prueba que lo comprueba |
+|---|---|---|
+| 1. Modelación matemática y restricciones del grafo inicial | `datos/grafo_inicial.json`; `src/modelo/validaciones.py::validar_configuracion_inicial` | `tests/test_validaciones.py::test_red_valida_con_dos_caminos`; `tests/test_grafo.py` |
+| 2. Comparar estrategias e implementar camino mínimo y caminos sin arcos compartidos | `src/algoritmos/busqueda_anchura.py::camino_minimo`; `src/algoritmos/busqueda_profundidad.py::busqueda_en_profundidad`; `src/algoritmos/flujo_maximo.py::maximo_caminos_disjuntos`; `docs/fuentes.md` | `tests/test_busquedas.py`; `tests/test_flujo_y_corte.py::test_dos_caminos_disjuntos_figura1` |
+| 3. Corte mínimo y visualización interactiva de soluciones | `src/algoritmos/corte_minimo.py::corte_minimo`; `src/interfaz/visualizacion.py::dibujar_grafo`; `src/interfaz/app.py::panel_resultados` | `tests/test_flujo_y_corte.py::test_corte_coincide_con_flujo`; `tests/test_visualizacion.py` |
+| 4. Modificar la red desde la interfaz y comparar configuraciones | `src/interfaz/app.py::panel_bloqueos`, `panel_agregar_arco`, `panel_seleccion_extremos`, `panel_comparacion`; `src/simulacion/configuraciones.py::comparar_configuraciones` | `tests/test_grafo.py::test_bloquear_y_restablecer`; `tests/test_configuraciones.py::test_tres_configuraciones_del_grupo` |
+| 5. Caso independiente, comparación manual y verificaciones | `datos/caso_verificacion.json`; `src/verificacion/verificador.py::verificar_todo`; `tests/test_caso_manual.py` | `tests/test_caso_manual.py::test_caso_manual_coincide_con_codigo`; `tests/test_verificador.py` |
+| Condición de implementación propia: no delegar cálculos a bibliotecas de grafos | `src/algoritmos/`; NetworkX se limita a `src/interfaz/visualizacion.py` | Comprobación estática de imports (grep); no hay una prueba automatizada que verifique esta restricción |
+| Documentar fuentes, dependencias e instrucciones de ejecución con repositorio accesible | Este `README.md`; `requirements.txt`; `docs/fuentes.md`; https://github.com/imeduuu/grafos_proyecto | Revisión documental; no aplica una prueba automatizada |
 
 
 ---

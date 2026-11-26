@@ -27,6 +27,12 @@ def tiene_lazos(grafo: GrafoDirigido) -> bool:
     Con la API de ``GrafoDirigido`` esto nunca ocurre, porque ``agregar_arco``
     rechaza los lazos. Se deja como comprobación explícita de la restricción
     para el informe y por si la lista de adyacencia se modifica directamente.
+
+    Parámetros:
+        grafo: laberinto cuyos arcos se revisarán.
+
+    Retorna:
+        True si hay al menos un lazo; False en caso contrario.
     """
     return any(origen == destino for origen, destino in grafo.arcos())
 
@@ -38,6 +44,12 @@ def tiene_arcos_reciprocos(grafo: GrafoDirigido) -> bool:
     rechaza el arco recíproco de uno existente. Se deja como comprobación
     explícita de la restricción para el informe y por si la lista de
     adyacencia se modifica directamente. Los lazos no cuentan como recíprocos.
+
+    Parámetros:
+        grafo: laberinto cuyos arcos se revisarán.
+
+    Retorna:
+        True si existe al menos un par de arcos recíprocos; False si no.
     """
     arcos = set(grafo.arcos())
     return any(origen != destino and (destino, origen) in arcos for origen, destino in arcos)
@@ -50,6 +62,12 @@ def vertices_aislados(grafo: GrafoDirigido) -> List[str]:
     bloqueado sigue existiendo en el laberinto. La lista respeta el orden de
     inserción de los vértices (``grafo.adyacencia``), para que el resultado
     sea reproducible.
+
+    Parámetros:
+        grafo: laberinto cuyos vértices se revisarán.
+
+    Retorna:
+        Lista ordenada de vértices que no participan en ningún arco.
     """
     con_arcos = set()
     for origen, destino in grafo.arcos():
@@ -74,6 +92,13 @@ def validar_configuracion_inicial(grafo: GrafoDirigido) -> List[str]:
     7. Al menos 2 caminos s -> t sin arcos compartidos, calculados sobre los
        arcos activos con ``maximo_caminos_disjuntos``. Solo se revisa si la
        entrada y la salida son válidas.
+
+    Parámetros:
+        grafo: configuración inicial del laberinto que se validará.
+
+    Retorna:
+        Lista de mensajes descriptivos de los incumplimientos; lista vacía
+        si se satisfacen todas las restricciones.
     """
     errores: List[str] = []
 

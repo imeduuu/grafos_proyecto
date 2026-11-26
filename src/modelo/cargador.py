@@ -30,8 +30,15 @@ from src.modelo.grafo import GrafoDirigido
 def _leer_json(ruta: str) -> Dict[str, Any]:
     """Lee un archivo JSON y verifica que su contenido sea un objeto.
 
-    Lanza FileNotFoundError si el archivo no existe y ValueError si el JSON
-    está mal formado o no es un objeto.
+    Parámetros:
+        ruta: ruta del archivo JSON que se leerá.
+
+    Retorna:
+        Diccionario con las claves y valores del archivo.
+
+    Errores:
+        FileNotFoundError si el archivo no existe; ValueError si el JSON
+        está mal formado o su raíz no es un objeto.
     """
     nombre = os.path.basename(ruta)
     with open(ruta, encoding="utf-8") as archivo:
@@ -47,7 +54,16 @@ def _leer_json(ruta: str) -> Dict[str, Any]:
 def _como_arco(arco: Any, nombre: str, clave: str) -> Tuple[Any, Any]:
     """Convierte un elemento [u, v] del JSON en la tupla (u, v).
 
-    Lanza ValueError si el elemento no es una lista de exactamente 2 valores.
+    Parámetros:
+        arco: valor JSON que representa un arco.
+        nombre: nombre del archivo para contextualizar errores.
+        clave: clave del objeto JSON donde se encontró el arco.
+
+    Retorna:
+        Tupla (origen, destino).
+
+    Errores:
+        ValueError si el elemento no contiene exactamente dos valores.
     """
     if not isinstance(arco, (list, tuple)) or len(arco) != 2:
         raise ValueError(
@@ -58,9 +74,18 @@ def _como_arco(arco: Any, nombre: str, clave: str) -> Tuple[Any, Any]:
 
 
 def _lista_de_arcos(datos: Dict[str, Any], clave: str, nombre: str) -> List[Any]:
-    """Obtiene la lista asociada a ``clave`` (lista vacía si no existe).
+    """Obtiene una lista de arcos de una clave opcional del JSON.
 
-    Lanza ValueError si el valor no es una lista.
+    Parámetros:
+        datos: objeto JSON leído del archivo.
+        clave: nombre de la clave que contiene los arcos.
+        nombre: nombre del archivo para contextualizar errores.
+
+    Retorna:
+        Lista asociada a la clave, o una lista vacía si no existe.
+
+    Errores:
+        ValueError si el valor asociado no es una lista.
     """
     valor = datos.get(clave, [])
     if not isinstance(valor, list):
@@ -69,7 +94,20 @@ def _lista_de_arcos(datos: Dict[str, Any], clave: str, nombre: str) -> List[Any]
 
 
 def _agregar_arcos(grafo: GrafoDirigido, arcos: List[Any], nombre: str, clave: str) -> None:
-    """Agrega cada arco con ``agregar_arco``, indicando archivo y arco si falla."""
+    """Agrega al grafo los arcos declarados en los datos JSON.
+
+    Parámetros:
+        grafo: grafo al que se incorporarán los arcos.
+        arcos: elementos JSON que representan arcos.
+        nombre: nombre del archivo para contextualizar errores.
+        clave: clave JSON de origen de la lista.
+
+    Retorna:
+        None.
+
+    Errores:
+        ValueError si un arco tiene formato inválido o el grafo lo rechaza.
+    """
     for arco in arcos:
         origen, destino = _como_arco(arco, nombre, clave)
         try:
@@ -81,7 +119,20 @@ def _agregar_arcos(grafo: GrafoDirigido, arcos: List[Any], nombre: str, clave: s
 
 
 def _bloquear_arcos(grafo: GrafoDirigido, arcos: List[Any], nombre: str, clave: str) -> None:
-    """Bloquea cada arco con ``bloquear_arco``, indicando archivo y arco si falla."""
+    """Bloquea en el grafo los arcos declarados en los datos JSON.
+
+    Parámetros:
+        grafo: grafo cuyos arcos se bloquearán.
+        arcos: elementos JSON que representan arcos existentes.
+        nombre: nombre del archivo para contextualizar errores.
+        clave: clave JSON de origen de la lista.
+
+    Retorna:
+        None.
+
+    Errores:
+        ValueError si un elemento es inválido o el arco no existe.
+    """
     for arco in arcos:
         origen, destino = _como_arco(arco, nombre, clave)
         try:
@@ -93,7 +144,20 @@ def _bloquear_arcos(grafo: GrafoDirigido, arcos: List[Any], nombre: str, clave: 
 
 
 def _definir_extremos(grafo: GrafoDirigido, entrada: Any, salida: Any, nombre: str) -> None:
-    """Define entrada y salida, indicando el archivo si son inválidas."""
+    """Asigna los vértices de entrada y salida e informa errores de datos.
+
+    Parámetros:
+        grafo: grafo cuyos extremos se configurarán.
+        entrada: identificador del vértice de entrada.
+        salida: identificador del vértice de salida.
+        nombre: nombre del archivo para contextualizar errores.
+
+    Retorna:
+        None.
+
+    Errores:
+        ValueError si faltan extremos, no existen o son iguales.
+    """
     if entrada is None or salida is None:
         raise ValueError(f"En '{nombre}' faltan las claves 'entrada' y/o 'salida'.")
     try:
@@ -113,16 +177,17 @@ def cargar_grafo_json(ruta: str) -> GrafoDirigido:
     clave opcional "bloqueados") y ``definir_entrada_salida``. Las posiciones
     [x, y] se convierten en tuplas (float, float). Las claves extra se ignoran.
 
+    Parámetros:
+        ruta: ruta del archivo JSON que contiene la configuración.
+
+    Retorna:
+        GrafoDirigido construido y validado a partir del archivo.
+
     Errores:
-    - FileNotFoundError: el archivo no existe.
-    - ValueError (el mensaje nombra el archivo) si:
-      - el JSON está mal formado o su raíz no es un objeto,
-      - "vertices" o "arcos" faltan o están vacíos (plantilla sin completar),
-      - un arco no es [origen, destino] o la API lo rechaza (lazo, repetido,
-        recíproco o vértice inexistente); el mensaje incluye el arco,
-      - un arco de "bloqueados" no existe en el grafo,
-      - "entrada"/"salida" faltan, no existen o son iguales,
-      - una posición no es [x, y] numérico o corresponde a un vértice inexistente.
+        FileNotFoundError si el archivo no existe. ValueError, con el nombre
+        del archivo en el mensaje, si el JSON es inválido, faltan vértices,
+        arcos o extremos, algún arco incumple las reglas del modelo o una
+        posición no es numérica o corresponde a un vértice inexistente.
     """
     nombre = os.path.basename(ruta)
     datos = _leer_json(ruta)
@@ -174,10 +239,16 @@ def guardar_grafo_json(grafo: GrafoDirigido, ruta: str) -> None:
     "posiciones" como listas [x, y]. El archivo resultante se puede releer con
     ``cargar_grafo_json`` y produce el mismo grafo.
 
+    Parámetros:
+        grafo: laberinto cuyos datos se serializarán.
+        ruta: ruta del archivo JSON de salida.
+
+    Retorna:
+        None. Escribe la representación del grafo en la ruta indicada.
+
     Errores:
-    - OSError (por ejemplo FileNotFoundError) si no se puede escribir en ``ruta``.
-    - Si entrada o salida no están definidas se guardan como null, y entonces
-      ``cargar_grafo_json`` rechazará el archivo con ValueError.
+        OSError si no se puede escribir el archivo. Si falta algún extremo,
+        se guarda como null y el archivo será rechazado al volver a cargarlo.
     """
     datos = {
         "vertices": list(grafo.adyacencia),
@@ -206,12 +277,16 @@ def cargar_configuracion(ruta_base: str, ruta_modificacion: str) -> GrafoDirigid
 
     El archivo base en disco no se modifica.
 
+    Parámetros:
+        ruta_base: ruta del JSON de la red original.
+        ruta_modificacion: ruta del JSON con los cambios que se aplicarán.
+
+    Retorna:
+        GrafoDirigido independiente con las modificaciones aplicadas.
+
     Errores:
-    - FileNotFoundError: no existe ``ruta_base`` o ``ruta_modificacion``.
-    - ValueError: cualquier error de ``cargar_grafo_json`` sobre la base, o, en
-      la modificación (el mensaje nombra el archivo y el arco): JSON mal
-      formado, un arco agregado inválido (lazo, repetido, recíproco, vértice
-      inexistente), un arco bloqueado inexistente, o entrada/salida inválidas.
+        FileNotFoundError si falta alguno de los archivos. ValueError si la
+        base o la modificación contiene JSON, arcos o extremos inválidos.
     """
     grafo = cargar_grafo_json(ruta_base)
 

@@ -1,4 +1,9 @@
-"""Corte mínimo de arcos usando el teorema de flujo máximo y corte mínimo."""
+"""Corte mínimo de arcos obtenido desde el flujo máximo.
+
+La complejidad temporal general es O(|V|·|E|²), dominada por Edmonds-Karp;
+la búsqueda residual adicional es O(|V| + |E|). El cálculo es código propio
+en Python y no utiliza bibliotecas externas de grafos.
+"""
 from collections import deque
 from typing import List, Set, Tuple
 from src.algoritmos.flujo_maximo import RedResidual, flujo_maximo_unitario

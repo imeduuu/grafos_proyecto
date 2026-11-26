@@ -1,4 +1,4 @@
-streamlit>=1.30
-networkx>=3.0
-matplotlib>=3.7
-pytest>=7.0
+streamlit>=1.49.0  # Interfaz web; 1.49 incorpora el parámetro width="stretch".
+networkx>=3.0  # Solo dibuja el grafo; no calcula rutas, flujos ni cortes.
+matplotlib>=3.7  # Renderiza las figuras de la visualización.
+pytest>=7.0  # Ejecuta la suite de pruebas automatizadas.

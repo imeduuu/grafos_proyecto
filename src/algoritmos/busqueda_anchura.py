@@ -1,4 +1,9 @@
-"""BFS: camino dirigido con el menor número de arcos. Complejidad O(V + E)."""
+"""Búsqueda en anchura para hallar caminos mínimos en grafos dirigidos.
+
+La complejidad temporal es O(|V| + |E|) con listas de adyacencia.
+El cálculo se implementa con estructuras básicas de Python, sin usar
+bibliotecas externas para resolver el problema algorítmico.
+"""
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 from src.modelo.grafo import GrafoDirigido

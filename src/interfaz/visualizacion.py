@@ -1,4 +1,8 @@
-#Dibujo del laberinto con matplotlib.
+"""Representación visual del laberinto con NetworkX y Matplotlib.
+
+NetworkX se utiliza exclusivamente para dibujar; los cálculos de caminos,
+flujo máximo y corte mínimo se realizan en los módulos propios de algoritmos.
+"""
 
 #networkx se usa SOLO para dibujar, nunca para calcular. Colores: camino
 #mínimo azul grueso, cada camino disjunto de un color distinto, corte rojo

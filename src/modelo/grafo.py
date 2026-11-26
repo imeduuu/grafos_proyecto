@@ -1,3 +1,5 @@
+"""Representación y operaciones de un laberinto como grafo dirigido."""
+
 import copy
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -13,6 +15,14 @@ class GrafoDirigido:
     """
 
     def __init__(self) -> None:
+        """Inicializa un grafo sin vértices, arcos ni extremos definidos.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            None. Inicializa las colecciones y atributos del grafo.
+        """
         self.vertices: Set[str] = set()
         self.adyacencia: Dict[str, List[str]] = {}
         self.bloqueados: Set[Arco] = set()
@@ -25,7 +35,14 @@ class GrafoDirigido:
     # ------------------------------------------------------------------
 
     def agregar_vertice(self, vertice: str) -> None:
-        """Agrega un vértice. Si ya existe, no hace nada."""
+        """Agrega un vértice nuevo, sin alterar el grafo si ya estaba registrado.
+
+        Parámetros:
+            vertice: identificador del vértice que se incorporará.
+
+        Retorna:
+            None.
+        """
         if vertice not in self.vertices:
             self.vertices.add(vertice)
             self.adyacencia[vertice] = []
@@ -33,11 +50,16 @@ class GrafoDirigido:
     def agregar_arco(self, origen: str, destino: str) -> None:
         """Agrega el pasillo dirigido origen -> destino.
 
-        Lanza ValueError si:
-        - es un lazo (origen == destino),
-        - origen o destino no existen como vértices,
-        - el arco origen -> destino ya existe (arco repetido),
-        - ya existe el arco recíproco destino -> origen.
+        Parámetros:
+            origen: vértice desde el que parte el pasillo.
+            destino: vértice al que llega el pasillo.
+
+        Retorna:
+            None.
+
+        Errores:
+            ValueError si el arco es un lazo, si algún extremo no existe,
+            si ya existe el mismo arco o si existe el arco recíproco.
         """
         if origen == destino:
             raise ValueError(f"No se permiten lazos: el arco ({origen}, {destino}) empieza y termina en el mismo vértice.")
@@ -54,7 +76,15 @@ class GrafoDirigido:
     def definir_entrada_salida(self, entrada: str, salida: str) -> None:
         """Define la entrada s y la salida t del laberinto.
 
-        Lanza ValueError si alguno de los vértices no existe o si son iguales.
+        Parámetros:
+            entrada: vértice existente que será el origen de las rutas.
+            salida: vértice existente y distinto que será el destino.
+
+        Retorna:
+            None.
+
+        Errores:
+            ValueError si algún vértice no existe o si ambos extremos son iguales.
         """
         self._exigir_vertice(entrada)
         self._exigir_vertice(salida)
@@ -70,8 +100,16 @@ class GrafoDirigido:
     def bloquear_arco(self, origen: str, destino: str) -> None:
         """Bloquea el pasillo origen -> destino sin borrarlo.
 
-        Bloquear un arco ya bloqueado no tiene efecto.
-        Lanza ValueError si el arco no existe.
+        Parámetros:
+            origen: vértice de salida del arco que se bloqueará.
+            destino: vértice de llegada del arco que se bloqueará.
+
+        Retorna:
+            None.
+
+        Errores:
+            ValueError si el arco no existe. Bloquear uno ya bloqueado no
+            produce cambios.
         """
         self._exigir_arco(origen, destino)
         self.bloqueados.add((origen, destino))
@@ -79,14 +117,30 @@ class GrafoDirigido:
     def restablecer_arco(self, origen: str, destino: str) -> None:
         """Quita el bloqueo del pasillo origen -> destino.
 
-        Restablecer un arco que no estaba bloqueado no tiene efecto.
-        Lanza ValueError si el arco no existe.
+        Parámetros:
+            origen: vértice de salida del arco que se restablecerá.
+            destino: vértice de llegada del arco que se restablecerá.
+
+        Retorna:
+            None.
+
+        Errores:
+            ValueError si el arco no existe. Restablecer uno activo no
+            produce cambios.
         """
         self._exigir_arco(origen, destino)
         self.bloqueados.discard((origen, destino))
 
     def esta_bloqueado(self, origen: str, destino: str) -> bool:
-        """Indica si el arco origen -> destino está bloqueado."""
+        """Indica si el arco dirigido está actualmente bloqueado.
+
+        Parámetros:
+            origen: vértice desde el que parte el arco.
+            destino: vértice al que llega el arco.
+
+        Retorna:
+            True si el arco está bloqueado; False en caso contrario.
+        """
         return (origen, destino) in self.bloqueados
 
     # ------------------------------------------------------------------
@@ -94,12 +148,19 @@ class GrafoDirigido:
     # ------------------------------------------------------------------
 
     def sucesores(self, vertice: str) -> List[str]:
-        """Vecinos alcanzables desde ``vertice`` por arcos NO bloqueados.
+        """Obtiene los vecinos alcanzables por arcos no bloqueados.
 
         Respeta el orden de inserción de los arcos para que los algoritmos
-        entreguen resultados reproducibles. Retorna una lista nueva, que se
-        puede modificar sin afectar al grafo.
-        Lanza ValueError si el vértice no existe.
+        entreguen resultados reproducibles.
+
+        Parámetros:
+            vertice: vértice cuyos sucesores se consultan.
+
+        Retorna:
+            Lista nueva de vértices destino de sus arcos activos.
+
+        Errores:
+            ValueError si el vértice no existe.
         """
         self._exigir_vertice(vertice)
         return [v for v in self.adyacencia[vertice] if (vertice, v) not in self.bloqueados]
@@ -109,23 +170,58 @@ class GrafoDirigido:
 
         Orden: por vértice de origen según su orden de inserción y, dentro de
         cada origen, según el orden en que se agregaron sus arcos.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            Lista de todos los arcos dirigidos del grafo.
         """
         return [(u, v) for u, destinos in self.adyacencia.items() for v in destinos]
 
     def arcos_activos(self) -> List[Arco]:
-        """Arcos no bloqueados, en el mismo orden que ``arcos()``."""
+        """Obtiene los arcos no bloqueados en el orden de ``arcos()``.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            Lista de arcos dirigidos que se pueden recorrer actualmente.
+        """
         return [arco for arco in self.arcos() if arco not in self.bloqueados]
 
     def existe_arco(self, origen: str, destino: str) -> bool:
-        """Indica si el arco origen -> destino existe (esté bloqueado o no)."""
+        """Comprueba si existe el arco, esté activo o bloqueado.
+
+        Parámetros:
+            origen: vértice desde el que parte el arco.
+            destino: vértice al que llega el arco.
+
+        Retorna:
+            True si el arco está registrado; False si no existe.
+        """
         return destino in self.adyacencia.get(origen, [])
 
     def cantidad_vertices(self) -> int:
-        """Retorna |V|."""
+        """Cuenta los vértices registrados en el grafo.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            Cantidad de vértices, |V|.
+        """
         return len(self.vertices)
 
     def cantidad_arcos(self) -> int:
-        """Retorna |E|, contando también los arcos bloqueados."""
+        """Cuenta todos los arcos, incluidos los bloqueados.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            Cantidad total de arcos, |E|.
+        """
         return sum(len(destinos) for destinos in self.adyacencia.values())
 
     def copiar(self) -> "GrafoDirigido":
@@ -133,6 +229,12 @@ class GrafoDirigido:
 
         Sirve para comparar configuraciones: modificar la copia (agregar,
         bloquear o restablecer arcos) no afecta al original.
+
+        Parámetros:
+            Ninguno.
+
+        Retorna:
+            Nuevo GrafoDirigido con los mismos vértices, arcos y atributos.
         """
         return copy.deepcopy(self)
 
@@ -141,11 +243,32 @@ class GrafoDirigido:
     # ------------------------------------------------------------------
 
     def _exigir_vertice(self, vertice: str) -> None:
-        """Lanza ValueError si el vértice no existe."""
+        """Valida que un vértice esté registrado en el grafo.
+
+        Parámetros:
+            vertice: identificador que se validará.
+
+        Retorna:
+            None si existe.
+
+        Errores:
+            ValueError si el vértice no pertenece al grafo.
+        """
         if vertice not in self.vertices:
             raise ValueError(f"El vértice '{vertice}' no existe en el grafo.")
 
     def _exigir_arco(self, origen: str, destino: str) -> None:
-        """Lanza ValueError si el arco origen -> destino no existe."""
+        """Valida que exista el arco dirigido indicado.
+
+        Parámetros:
+            origen: vértice desde el que parte el arco.
+            destino: vértice al que llega el arco.
+
+        Retorna:
+            None si el arco existe.
+
+        Errores:
+            ValueError si el arco no está registrado.
+        """
         if not self.existe_arco(origen, destino):
             raise ValueError(f"El arco ({origen}, {destino}) no existe en el grafo.")

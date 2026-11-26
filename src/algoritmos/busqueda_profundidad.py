@@ -1,4 +1,9 @@
-"""DFS iterativo: encuentra un camino válido, pero no garantiza el más corto."""
+"""Búsqueda en profundidad iterativa para explorar grafos dirigidos.
+
+Complejidad temporal del recorrido estructural: O(|V| + |E|); copiar las
+rutas parciales puede aumentar ese costo. Se usa una pila implementada en
+Python y no una biblioteca externa para realizar el cálculo.
+"""
 from typing import List, Optional
 from src.modelo.grafo import GrafoDirigido
 
