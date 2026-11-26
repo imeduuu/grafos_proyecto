@@ -6,7 +6,6 @@
 **Integrantes:** Eduardo, Ricardo y Nicolás.
 
 **Fecha de presentación:** jueves 26 de noviembre de 2026.  
-**Entrega del informe:** jueves 26 de noviembre de 2026, hasta las 23:00 horas en Educa.
 
 **Repositorio:** https://github.com/imeduuu/grafos_proyecto
 
@@ -148,12 +147,7 @@ grafos_proyecto/
 │   ├── test_visualizacion.py
 │   └── test_configuraciones.py
 └── docs/
-    ├── fuentes.md
-    ├── informe/
-    │   ├── seccion1_modelo.md
-    │   └── seccion5_verificacion.md
-    └── imagenes/
-        └── .gitkeep
+    └── fuentes.md
 ```
 
 Los archivos `__init__.py` de los paquetes Python se omiten del árbol para facilitar la lectura.
@@ -460,9 +454,6 @@ Los siguientes archivos de documentación están presentes en la versión revisa
 | Archivo o carpeta | Contenido |
 |---|---|
 | `docs/fuentes.md` | Fuentes académicas y técnicas utilizadas. |
-| `docs/informe/seccion1_modelo.md` | Modelación matemática del laberinto. |
-| `docs/informe/seccion5_verificacion.md` | Verificación manual y matemática. |
-| `docs/imagenes/` | Carpeta preparada para incorporar imágenes y capturas. |
 
 Las fuentes académicas y técnicas consultadas están identificadas en [`docs/fuentes.md`](docs/fuentes.md).
 
